@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_app/components/custom_button.dart';
 import 'package:flutter_chat_app/components/custom_input_field.dart';
+import 'package:flutter_chat_app/features/auth/auth_service.dart';
 
 class RegisterPage extends StatefulWidget {
   final void Function()? onTap;
@@ -19,7 +20,36 @@ class _RegisterPageState extends State<RegisterPage> {
   TextEditingController confirmPasswordController = TextEditingController();
 
   // register method
-  void register() {}
+  void register() async {
+    // get auth service
+    final authService = AuthService();
+
+    // get user data
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+    String confirmPassword = confirmPasswordController.text.trim();
+    if (password.length >= 6 && confirmPassword.length >= 6) {
+      if (password == confirmPassword) {
+        try {
+          await authService.register(email, password);
+        } catch (e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(e.toString()),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Password and confirm password not same"),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
 
   @override
   void dispose() {
