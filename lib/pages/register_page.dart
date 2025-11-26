@@ -56,7 +56,7 @@ class RegisterPage extends StatelessWidget {
             const SizedBox(height: 15),
             GestureDetector(
               onTap: onTap,
-              child: Text("Already have an accout? Login now"),
+              child: Text("Already have an account? Login now"),
             ),
           ],
         ),
