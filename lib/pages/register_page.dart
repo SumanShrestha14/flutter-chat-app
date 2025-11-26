@@ -2,16 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_app/components/custom_button.dart';
 import 'package:flutter_chat_app/components/custom_input_field.dart';
 
-class RegisterPage extends StatelessWidget {
-  TextEditingController? emailController;
-  TextEditingController? passwordController;
-  TextEditingController? confirmPasswordController;
+class RegisterPage extends StatefulWidget {
   final void Function()? onTap;
 
-  RegisterPage({super.key, required this.onTap});
+  const RegisterPage({super.key, required this.onTap});
+
+  @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
+
+class _RegisterPageState extends State<RegisterPage> {
+  TextEditingController emailController = TextEditingController();
+
+  TextEditingController passwordController = TextEditingController();
+
+  TextEditingController confirmPasswordController = TextEditingController();
 
   // register method
   void register() {}
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +71,7 @@ class RegisterPage extends StatelessWidget {
             // register now
             const SizedBox(height: 15),
             GestureDetector(
-              onTap: onTap,
+              onTap: widget.onTap,
               child: Text("Already have an account? Login now"),
             ),
           ],
