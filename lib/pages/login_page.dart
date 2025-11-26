@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_app/components/custom_button.dart';
 import 'package:flutter_chat_app/components/custom_input_field.dart';
+import 'package:flutter_chat_app/features/auth/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
   final void Function()? onTap;
@@ -16,7 +17,22 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController passwordController = TextEditingController();
 
   // login method
-  void login() {}
+  void login() async {
+    final authService = AuthService();
+    // get user data
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+    try {
+      await authService.login(email, password);
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString()), duration: Duration(seconds: 2)),
+      );
+    }
+  }
 
   @override
   void dispose() {
