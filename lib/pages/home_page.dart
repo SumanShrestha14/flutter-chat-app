@@ -7,10 +7,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Home page"),
-        // actions: [IconButton(onPressed: logout, icon: Icon(Icons.logout))],
-      ),
+      appBar: AppBar(title: Text("Home page")),
       drawer: CustomDrawer(),
     );
   }

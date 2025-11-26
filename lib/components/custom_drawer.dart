@@ -5,9 +5,18 @@ import 'package:flutter_chat_app/pages/settings_page.dart';
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({super.key});
 
-  void logout() async {
-    final auth = AuthService();
-    await auth.logout();
+  void logout(BuildContext context) async {
+    try {
+      final auth = AuthService();
+      await auth.logout();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Failed to logout"),
+          duration: Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   @override
@@ -47,6 +56,7 @@ class CustomDrawer extends StatelessWidget {
                   title: Text("S E T T I N G S"),
                   leading: Icon(Icons.settings),
                   onTap: () {
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => SettingsPage()),
@@ -63,8 +73,8 @@ class CustomDrawer extends StatelessWidget {
               padding: const EdgeInsets.only(left: 25.0, bottom: 50),
               child: ListTile(
                 title: Text("L O G O U T"),
-                leading: Icon(Icons.login),
-                onTap: logout,
+                leading: Icon(Icons.logout),
+                onTap: () => logout(context),
               ),
             ),
           ),
