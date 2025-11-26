@@ -1,7 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_app/features/auth/auth_gate.dart';
-import 'package:flutter_chat_app/features/auth/login_or_register.dart';
 import 'package:flutter_chat_app/firebase_options.dart';
 import 'package:flutter_chat_app/theme/light_mode.dart';
 
