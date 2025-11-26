@@ -25,9 +25,11 @@ class _LoginPageState extends State<LoginPage> {
     try {
       await authService.login(email, password);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), duration: Duration(seconds: 2)),
-      );
+      if (!mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString()), duration: Duration(seconds: 2)),
+        );
+      }
     }
   }
 

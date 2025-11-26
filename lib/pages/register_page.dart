@@ -33,10 +33,11 @@ class _RegisterPageState extends State<RegisterPage> {
         try {
           await authService.register(email, password);
         } catch (e) {
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(e.toString()),
-              duration: Duration(seconds: 2),
+              duration: const Duration(seconds: 2),
             ),
           );
         }
@@ -48,6 +49,13 @@ class _RegisterPageState extends State<RegisterPage> {
           ),
         );
       }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Password must be at least 6 characters long"),
+          duration: Duration(seconds: 2),
+        ),
+      );
     }
   }
 

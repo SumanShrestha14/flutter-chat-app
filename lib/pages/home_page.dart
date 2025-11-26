@@ -3,9 +3,9 @@ import 'package:flutter_chat_app/features/auth/auth_service.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
-  void logout() {
+  void logout() async {
     final _auth = AuthService();
-    _auth.logout();
+    await _auth.logout();
   }
 
   @override
