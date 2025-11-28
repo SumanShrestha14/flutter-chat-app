@@ -1,0 +1,2 @@
+Add error handling for Firebase initialization.
+Add input validation before calling login.
