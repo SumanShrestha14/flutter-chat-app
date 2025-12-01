@@ -8,15 +8,6 @@ class AuthService {
 
   // login
   Future<UserCredential> login(String email, String password) async {
-    // try {
-    //   UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-    //     email: email,
-    //     password: password,
-    //   );
-    //   return userCredential;
-    // } on FirebaseAuthException catch (e) {
-    //   throw Exception(e.code);
-    // }
     return await _auth.signInWithEmailAndPassword(
       email: email,
       password: password,
@@ -41,6 +32,7 @@ class AuthService {
           }, SetOptions(merge: true));
     } catch (e) {
       // Consider rolling back the user creation or logging the error
+      await userCredential.user?.delete();
       throw Exception('Failed to save user data: $e');
     }
     return userCredential;
