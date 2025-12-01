@@ -2,16 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_app/features/auth/auth_service.dart';
 import 'package:flutter_chat_app/pages/settings_page.dart';
 
-class CustomDrawer extends StatelessWidget {
+class CustomDrawer extends StatefulWidget {
   const CustomDrawer({super.key});
 
-  void logout(BuildContext context) async {
+  @override
+  State<CustomDrawer> createState() => _CustomDrawerState();
+}
+
+class _CustomDrawerState extends State<CustomDrawer> {
+  Future<void> logout() async {
     try {
-      final auth = AuthService();
-      await auth.logout();
+      await AuthService().logout();
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text("Failed to logout"),
           duration: Duration(seconds: 2),
         ),
@@ -74,7 +79,7 @@ class CustomDrawer extends StatelessWidget {
               child: ListTile(
                 title: Text("L O G O U T"),
                 leading: Icon(Icons.logout),
-                onTap: () => logout(context),
+                onTap: () => logout(),
               ),
             ),
           ),
