@@ -47,17 +47,28 @@ class HomePage extends StatelessWidget {
     Map<String, dynamic> userData,
     BuildContext context,
   ) {
-    // display all users except all users
+    final email = userData["email"];
+
     return UserTile(
       onTap: () {
+        if (email is! String || email.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Cannot open chat: invalid user email"),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          return;
+        }
+
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ChatPage(receiverEmail: userData["email"]),
+            builder: (context) => ChatPage(receiverEmail: email),
           ),
         );
       },
-      text: userData["email"] ?? "Anonymous ",
+      text: (email is String && email.isNotEmpty) ? email : "Anonymous",
     );
   }
 }

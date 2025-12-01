@@ -10,12 +10,11 @@ class CustomDrawer extends StatefulWidget {
 }
 
 class _CustomDrawerState extends State<CustomDrawer> {
-  void logout() async {
+  Future<void> logout() async {
     try {
       await AuthService().logout();
     } catch (e) {
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Failed to logout"),

@@ -25,22 +25,24 @@ class AuthService {
 
   // register
   Future<UserCredential> register(String email, String password) async {
-    // try {
-    //   return userCredential;
-    // } on FirebaseAuthException catch (e) {
-    //   throw Exception(e.code);
-    // }
-
     // sign in user
     UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
-    // save user info if it doesn't exists already
-    _firebaseFirestore.collection("Users").doc(userCredential.user!.uid).set({
-      'uid': userCredential.user!.uid,
-      'email': email,
-    });
+    // Save user info to Firestore
+    try {
+      await _firebaseFirestore
+          .collection("Users")
+          .doc(userCredential.user!.uid)
+          .set({
+            'uid': userCredential.user!.uid,
+            'email': email,
+          }, SetOptions(merge: true));
+    } catch (e) {
+      // Consider rolling back the user creation or logging the error
+      throw Exception('Failed to save user data: $e');
+    }
     return userCredential;
   }
 

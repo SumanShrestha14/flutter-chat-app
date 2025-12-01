@@ -18,11 +18,10 @@ class UserTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(15),
           ),
           child: Row(
-            // mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // icon
-              Icon(Icons.person),
+              const Icon(Icons.person),
               const SizedBox(width: 10),
               // username
               Text(text),
