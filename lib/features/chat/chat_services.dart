@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_chat_app/features/auth/auth_service.dart';
 import 'package:flutter_chat_app/models/message.dart';
 
 class ChatServices {
@@ -27,8 +26,16 @@ class ChatServices {
   // send message
   Future<void> sendMessage(String receiverID, String message) async {
     // get current logged in user
-    final String currentUserID = auth.currentUser!.uid;
-    final String currentUserEmail = auth.currentUser!.email!;
+    final currentUser = auth.currentUser;
+    if (currentUser == null) {
+      throw Exception('No authenticated user found');
+    }
+
+    final String currentUserID = currentUser.uid;
+    final String? currentUserEmail = currentUser.email;
+    if (currentUserEmail == null) {
+      throw Exception('User email not available');
+    }
     final Timestamp timestamp = Timestamp.now();
 
     // create new message
@@ -53,7 +60,7 @@ class ChatServices {
 
   // receive message
 
-  Stream<QuerySnapshot> getMessages(String userID, otherUserID) {
+  Stream<QuerySnapshot> getMessages(String userID, String otherUserID) {
     List<String> ids = [userID, otherUserID];
     ids.sort();
     String chatRoomID = ids.join('_');

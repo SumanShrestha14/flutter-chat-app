@@ -48,6 +48,7 @@ class HomePage extends StatelessWidget {
     BuildContext context,
   ) {
     final email = userData["email"];
+    final uid = userData["uid"];
 
     return UserTile(
       onTap: () {
@@ -61,11 +62,22 @@ class HomePage extends StatelessWidget {
           return;
         }
 
+        if (uid is! String || uid.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Cannot open chat: invalid user ID"),
+              duration: Duration(seconds: 2),
+            ),
+          );
+          return;
+        }
+
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) =>
-                ChatPage(receiverEmail: email, receiverID: userData["uid"]),
+                // ChatPage(receiverEmail: email, receiverID: userData["uid"]),
+                ChatPage(receiverEmail: email, receiverID: uid),
           ),
         );
       },
