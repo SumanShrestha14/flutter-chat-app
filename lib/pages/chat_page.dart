@@ -27,12 +27,13 @@ class _ChatPageState extends State<ChatPage> {
   void sendMessage() async {
     // if there is something in textField and button is clicked
 
-    if (messageController.text.isNotEmpty) {
+    if (messageController.text.trim().isNotEmpty) {
       try {
         await chatServices.sendMessage(
           widget.receiverID,
-          messageController.text,
+          messageController.text.trim(),
         );
+        if (!mounted) return;
         messageController.clear();
       } catch (e) {
         if (!mounted) return;
