@@ -71,7 +71,11 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Widget buildMessageList() {
-    String senderID = authService.getCurrentUser()!.uid;
+    final currentUser = authService.getCurrentUser();
+    if (currentUser == null) {
+      return const Center(child: Text("User not authenticated"));
+    }
+    String senderID = currentUser.uid;
     return StreamBuilder(
       stream: chatServices.getMessages(widget.receiverID, senderID),
       builder: (context, snapshot) {
@@ -96,6 +100,17 @@ class _ChatPageState extends State<ChatPage> {
     // if current user display message send by user on right side else left
 
     bool isCurrentUser = data["senderID"] == authService.getCurrentUser()!.uid;
+    final currentUser = authService.getCurrentUser();
+    if (currentUser == null) {
+      return const SizedBox.shrink(); // Skip rendering if no user
+    }
+
+    // Validate message field
+    final message = data["message"];
+    if (message == null || message is! String) {
+      return const SizedBox.shrink(); // Skip malformed messages
+    }
+
     var alignment = isCurrentUser
         ? Alignment.centerRight
         : Alignment.centerLeft;
@@ -106,9 +121,7 @@ class _ChatPageState extends State<ChatPage> {
         crossAxisAlignment: isCurrentUser
             ? CrossAxisAlignment.end
             : CrossAxisAlignment.start,
-        children: [
-          ChatBubble(message: data["message"], isCurrentUser: isCurrentUser),
-        ],
+        children: [ChatBubble(message: message, isCurrentUser: isCurrentUser)],
       ),
     );
   }
