@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_chat_app/models/message.dart';
 
 class ChatServices {
@@ -14,7 +15,7 @@ class ChatServices {
         .snapshots()
         .handleError((error) {
           // Log error or return empty list
-          print('Error fetching users: $error');
+          debugPrint('Error fetching users: $error');
         })
         .map((snapshot) {
           return snapshot.docs.map((doc) {
