@@ -26,6 +26,9 @@ class _ChatPageState extends State<ChatPage> {
 
   // for textfield focus
   final FocusNode focusNode = FocusNode();
+  
+  // Track previous message count to detect new messages
+  int _previousMessageCount = 0;
 
   @override
   void initState() {
@@ -36,10 +39,10 @@ class _ChatPageState extends State<ChatPage> {
         // cause a delay so that keyboard has time to show up
         // then the amount of remaining space will be calculates
         // then scroll down
-        Future.delayed(const Duration(milliseconds: 500), () => scrollDown());
-        // wait a bit for listview to build  then scroll down
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) scrollDown();
+        });
       }
-      Future.delayed(const Duration(milliseconds: 500), () => scrollDown());
     });
   }
 
@@ -52,12 +55,31 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   final ScrollController scrollController = ScrollController();
+  
   void scrollDown() {
+    if (!scrollController.hasClients) return;
+    
+    final maxScroll = scrollController.position.maxScrollExtent;
+    if (maxScroll <= 0) return;
+    
     scrollController.animateTo(
-      scrollController.position.maxScrollExtent,
-      duration: const Duration(seconds: 1),
-      curve: Curves.fastOutSlowIn,
+      maxScroll,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
     );
+  }
+  
+  void scrollToBottom() {
+    if (!scrollController.hasClients) return;
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (scrollController.hasClients) {
+        final maxScroll = scrollController.position.maxScrollExtent;
+        if (maxScroll > 0) {
+          scrollController.jumpTo(maxScroll);
+        }
+      }
+    });
   }
 
   void sendMessage() async {
@@ -70,8 +92,11 @@ class _ChatPageState extends State<ChatPage> {
           messageController.text.trim(),
         );
         if (!mounted) return;
-        scrollDown();
         messageController.clear();
+        // Wait for StreamBuilder to update, then scroll
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (mounted) scrollToBottom();
+        });
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -110,16 +135,38 @@ class _ChatPageState extends State<ChatPage> {
       stream: chatServices.getMessages(widget.receiverID, senderID),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const Text("Error");
+          return const Center(child: Text("Error loading messages"));
         }
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Text("Loading..");
+          return const Center(child: Text("Loading.."));
         }
-        return ListView(
+        
+        final docs = snapshot.data!.docs;
+        final currentMessageCount = docs.length;
+        
+        // Scroll to bottom when new messages arrive (count increased)
+        if (currentMessageCount > _previousMessageCount && currentMessageCount > 0) {
+          _previousMessageCount = currentMessageCount;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) scrollToBottom();
+          });
+        } else if (_previousMessageCount == 0 && currentMessageCount > 0) {
+          // Initial load - scroll to bottom
+          _previousMessageCount = currentMessageCount;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) scrollToBottom();
+          });
+        } else {
+          _previousMessageCount = currentMessageCount;
+        }
+        
+        return ListView.builder(
           controller: scrollController,
-          children: snapshot.data!.docs
-              .map((doc) => buildMessageItem(doc))
-              .toList(),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+          itemCount: docs.length,
+          itemBuilder: (context, index) {
+            return buildMessageItem(docs[index]);
+          },
         );
       },
     );
