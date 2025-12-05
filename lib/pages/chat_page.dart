@@ -26,7 +26,7 @@ class _ChatPageState extends State<ChatPage> {
 
   // for textfield focus
   final FocusNode focusNode = FocusNode();
-  
+
   // Track previous message count to detect new messages
   int _previousMessageCount = 0;
 
@@ -55,23 +55,24 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   final ScrollController scrollController = ScrollController();
-  
+
   void scrollDown() {
+    if (!mounted) return;
     if (!scrollController.hasClients) return;
-    
+
     final maxScroll = scrollController.position.maxScrollExtent;
     if (maxScroll <= 0) return;
-    
+
     scrollController.animateTo(
       maxScroll,
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
     );
   }
-  
+
   void scrollToBottom() {
     if (!scrollController.hasClients) return;
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (scrollController.hasClients) {
         final maxScroll = scrollController.position.maxScrollExtent;
@@ -140,18 +141,12 @@ class _ChatPageState extends State<ChatPage> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: Text("Loading.."));
         }
-        
+
         final docs = snapshot.data!.docs;
         final currentMessageCount = docs.length;
-        
+
         // Scroll to bottom when new messages arrive (count increased)
-        if (currentMessageCount > _previousMessageCount && currentMessageCount > 0) {
-          _previousMessageCount = currentMessageCount;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) scrollToBottom();
-          });
-        } else if (_previousMessageCount == 0 && currentMessageCount > 0) {
-          // Initial load - scroll to bottom
+        if (currentMessageCount > _previousMessageCount) {
           _previousMessageCount = currentMessageCount;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted) scrollToBottom();
@@ -159,7 +154,7 @@ class _ChatPageState extends State<ChatPage> {
         } else {
           _previousMessageCount = currentMessageCount;
         }
-        
+
         return ListView.builder(
           controller: scrollController,
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
