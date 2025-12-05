@@ -22,13 +22,41 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController messageController = TextEditingController();
 
   final ChatServices chatServices = ChatServices();
-
   final AuthService authService = AuthService();
+
+  // for textfield focus
+  FocusNode focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+
+    focusNode.addListener(() {
+      if (focusNode.hasFocus) {
+        // cause a delay so that keyboard has time to show up
+        // then the amount of remaining space will be calculates
+        // then scroll down
+        Future.delayed(const Duration(milliseconds: 500), () => scrollDown());
+        // wait a bit for listview to build  then scroll down
+        Future.delayed(const Duration(milliseconds: 500), () => scrollDown());
+      }
+    });
+  }
 
   @override
   void dispose() {
+    focusNode.dispose();
     messageController.dispose();
     super.dispose();
+  }
+
+  final ScrollController scrollController = ScrollController();
+  void scrollDown() {
+    scrollController.animateTo(
+      scrollController.position.maxScrollExtent,
+      duration: const Duration(seconds: 1),
+      curve: Curves.fastOutSlowIn,
+    );
   }
 
   void sendMessage() async {
@@ -41,6 +69,7 @@ class _ChatPageState extends State<ChatPage> {
           messageController.text.trim(),
         );
         if (!mounted) return;
+        scrollDown();
         messageController.clear();
       } catch (e) {
         if (!mounted) return;
@@ -86,6 +115,7 @@ class _ChatPageState extends State<ChatPage> {
           return const Text("Loading..");
         }
         return ListView(
+          controller: scrollController,
           children: snapshot.data!.docs
               .map((doc) => buildMessageItem(doc))
               .toList(),
@@ -132,6 +162,7 @@ class _ChatPageState extends State<ChatPage> {
         // text field to write message
         Expanded(
           child: CustomInputField(
+            focusNode: focusNode,
             hintText: "Write a message...",
             isObscureText: false,
             controller: messageController,
