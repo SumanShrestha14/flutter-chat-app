@@ -25,7 +25,7 @@ class _ChatPageState extends State<ChatPage> {
   final AuthService authService = AuthService();
 
   // for textfield focus
-  FocusNode focusNode = FocusNode();
+  final FocusNode focusNode = FocusNode();
 
   @override
   void initState() {
@@ -38,8 +38,8 @@ class _ChatPageState extends State<ChatPage> {
         // then scroll down
         Future.delayed(const Duration(milliseconds: 500), () => scrollDown());
         // wait a bit for listview to build  then scroll down
-        Future.delayed(const Duration(milliseconds: 500), () => scrollDown());
       }
+      Future.delayed(const Duration(milliseconds: 500), () => scrollDown());
     });
   }
 
@@ -47,6 +47,7 @@ class _ChatPageState extends State<ChatPage> {
   void dispose() {
     focusNode.dispose();
     messageController.dispose();
+    scrollController.dispose();
     super.dispose();
   }
 
