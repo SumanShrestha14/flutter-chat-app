@@ -4,11 +4,13 @@ class CustomInputField extends StatelessWidget {
   final String hintText;
   final bool isObscureText;
   final TextEditingController? controller;
+  final FocusNode? focusNode;
   const CustomInputField({
     super.key,
     required this.hintText,
     required this.isObscureText,
     required this.controller,
+    this.focusNode,
   });
 
   @override
@@ -17,6 +19,7 @@ class CustomInputField extends StatelessWidget {
       padding: const EdgeInsets.all(15.0),
       child: TextField(
         obscureText: isObscureText,
+        focusNode: focusNode,
         controller: controller,
         decoration: InputDecoration(
           enabledBorder: OutlineInputBorder(

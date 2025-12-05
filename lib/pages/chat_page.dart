@@ -22,13 +22,65 @@ class _ChatPageState extends State<ChatPage> {
   final TextEditingController messageController = TextEditingController();
 
   final ChatServices chatServices = ChatServices();
-
   final AuthService authService = AuthService();
+
+  // for textfield focus
+  final FocusNode focusNode = FocusNode();
+
+  // Track previous message count to detect new messages
+  int _previousMessageCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    focusNode.addListener(() {
+      if (focusNode.hasFocus) {
+        // cause a delay so that keyboard has time to show up
+        // then the amount of remaining space will be calculates
+        // then scroll down
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (mounted) scrollDown();
+        });
+      }
+    });
+  }
 
   @override
   void dispose() {
+    focusNode.dispose();
     messageController.dispose();
+    scrollController.dispose();
     super.dispose();
+  }
+
+  final ScrollController scrollController = ScrollController();
+
+  void scrollDown() {
+    if (!mounted) return;
+    if (!scrollController.hasClients) return;
+
+    final maxScroll = scrollController.position.maxScrollExtent;
+    if (maxScroll <= 0) return;
+
+    scrollController.animateTo(
+      maxScroll,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+  }
+
+  void scrollToBottom() {
+    if (!scrollController.hasClients) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (scrollController.hasClients) {
+        final maxScroll = scrollController.position.maxScrollExtent;
+        if (maxScroll > 0) {
+          scrollController.jumpTo(maxScroll);
+        }
+      }
+    });
   }
 
   void sendMessage() async {
@@ -42,6 +94,10 @@ class _ChatPageState extends State<ChatPage> {
         );
         if (!mounted) return;
         messageController.clear();
+        // Wait for StreamBuilder to update, then scroll
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (mounted) scrollToBottom();
+        });
       } catch (e) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -80,15 +136,32 @@ class _ChatPageState extends State<ChatPage> {
       stream: chatServices.getMessages(widget.receiverID, senderID),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return const Text("Error");
+          return const Center(child: Text("Error loading messages"));
         }
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Text("Loading..");
+          return const Center(child: Text("Loading.."));
         }
-        return ListView(
-          children: snapshot.data!.docs
-              .map((doc) => buildMessageItem(doc))
-              .toList(),
+
+        final docs = snapshot.data!.docs;
+        final currentMessageCount = docs.length;
+
+        // Scroll to bottom when new messages arrive (count increased)
+        if (currentMessageCount > _previousMessageCount) {
+          _previousMessageCount = currentMessageCount;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) scrollToBottom();
+          });
+        } else {
+          _previousMessageCount = currentMessageCount;
+        }
+
+        return ListView.builder(
+          controller: scrollController,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+          itemCount: docs.length,
+          itemBuilder: (context, index) {
+            return buildMessageItem(docs[index]);
+          },
         );
       },
     );
@@ -132,6 +205,7 @@ class _ChatPageState extends State<ChatPage> {
         // text field to write message
         Expanded(
           child: CustomInputField(
+            focusNode: focusNode,
             hintText: "Write a message...",
             isObscureText: false,
             controller: messageController,
