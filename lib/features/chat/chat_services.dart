@@ -75,5 +75,6 @@ class ChatServices {
   }
 
   // TODO: Report User
-  // TODO: Block User Unblock User
+  // TODO: Block User
+  // TODO: Unblock User
 }
