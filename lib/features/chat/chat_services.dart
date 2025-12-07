@@ -27,10 +27,12 @@ class ChatServices extends ChangeNotifier {
   // Get all user expects blocked users
   Stream<List<Map<String, dynamic>>> getUserStreamExceptBlockedUser() {
     final currentUser = auth.currentUser;
-
+    if (currentUser == null) {
+      throw Exception('No authenticated user found');
+    }
     return firebaseFirestore
         .collection('Users')
-        .doc(currentUser!.uid)
+        .doc(currentUser.uid)
         .collection("BlockedUser")
         .snapshots()
         .asyncMap((snapshot) async {
@@ -98,8 +100,12 @@ class ChatServices extends ChangeNotifier {
   // Report User
   Future<void> reportUser(String messageId, String userId) async {
     final currentUser = auth.currentUser;
+    if (currentUser == null) {
+      throw Exception('No authenticated user found');
+    }
+
     final report = {
-      'reportedBy': currentUser!.uid,
+      'reportedBy': currentUser.uid,
       'messageId': messageId,
       'messageOwnerId': userId,
       'timeStamp': FieldValue.serverTimestamp(),
@@ -112,10 +118,16 @@ class ChatServices extends ChangeNotifier {
 
   Future<void> blockUser(String userID) async {
     final currentUser = auth.currentUser;
+    if (currentUser == null) {
+      throw Exception('No authenticated user found');
+    }
 
+    if (currentUser.uid == userID) {
+      throw Exception('Cannot block yourself');
+    }
     await firebaseFirestore
         .collection("Users")
-        .doc(currentUser!.uid)
+        .doc(currentUser.uid)
         .collection("BlockedUser")
         .doc(userID)
         .set({});
@@ -125,12 +137,17 @@ class ChatServices extends ChangeNotifier {
   // Unblock User
   Future<void> unblockUser(String blockedUserId) async {
     final currentUser = auth.currentUser;
+
+    if (currentUser == null) {
+      throw Exception('No authenticated user found');
+    }
     await firebaseFirestore
         .collection("Users")
-        .doc(currentUser!.uid)
+        .doc(currentUser.uid)
         .collection("BlockedUser")
         .doc(blockedUserId)
         .delete();
+    notifyListeners();
   }
 
   // Get Blocked user
