@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_chat_app/models/message.dart';
 
-class ChatServices {
+class ChatServices extends ChangeNotifier {
   // Firestore and auth
   final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
   final FirebaseAuth auth = FirebaseAuth.instance;
@@ -90,6 +90,19 @@ class ChatServices {
   }
 
   // Block User
+
+  Future<void> blockUser(String userID) async {
+    final currentUser = auth.currentUser;
+
+    await firebaseFirestore
+        .collection("Users")
+        .doc(currentUser!.uid)
+        .collection("BlockedUser")
+        .doc(userID)
+        .set({});
+    notifyListeners();
+  }
+
   // Unblock User
   // Get Blocked user
 }
