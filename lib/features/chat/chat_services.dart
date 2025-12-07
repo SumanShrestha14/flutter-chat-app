@@ -3,12 +3,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_chat_app/models/message.dart';
 
-class ChatServices {
+class ChatServices extends ChangeNotifier {
   // Firestore and auth
   final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
   final FirebaseAuth auth = FirebaseAuth.instance;
 
-  // Get user stream
+  // Get all user stream
   Stream<List<Map<String, dynamic>>> getUserStream() {
     return firebaseFirestore
         .collection("Users")
@@ -21,6 +21,29 @@ class ChatServices {
           return snapshot.docs.map((doc) {
             return doc.data();
           }).toList();
+        });
+  }
+
+  // Get all user expect blocked users
+  Stream<List<Map<String, dynamic>>> getUserStreamExceptBlockedUser() {
+    final currentUser = auth.currentUser;
+    if (currentUser == null) {
+      throw Exception('No authenticated user found');
+    }
+    return firebaseFirestore
+        .collection('Users')
+        .doc(currentUser.uid)
+        .collection("BlockedUser")
+        .snapshots()
+        .asyncMap((snapshot) async {
+          final blockedUserIds = snapshot.docs.map((doc) => doc.id).toList();
+          final userSnapShot = await firebaseFirestore
+              .collection('Users')
+              .get();
+          return userSnapShot.docs
+              .where((doc) => !blockedUserIds.contains(doc.id))
+              .map((doc) => doc.data())
+              .toList();
         });
   }
 
@@ -74,7 +97,73 @@ class ChatServices {
         .snapshots();
   }
 
-  // TODO: Report User
-  // TODO: Block User
-  // TODO: Unblock User
+  // Report User
+  Future<void> reportUser(String messageId, String userId) async {
+    final currentUser = auth.currentUser;
+    if (currentUser == null) {
+      throw Exception('No authenticated user found');
+    }
+
+    final report = {
+      'reportedBy': currentUser.uid,
+      'messageId': messageId,
+      'messageOwnerId': userId,
+      'timeStamp': FieldValue.serverTimestamp(),
+    };
+
+    await firebaseFirestore.collection("reports").add(report);
+  }
+
+  // Block User
+
+  Future<void> blockUser(String userID) async {
+    final currentUser = auth.currentUser;
+    if (currentUser == null) {
+      throw Exception('No authenticated user found');
+    }
+    await firebaseFirestore
+        .collection("Users")
+        .doc(currentUser.uid)
+        .collection("BlockedUser")
+        .doc(userID)
+        .set({});
+    notifyListeners();
+  }
+
+  // Unblock User
+  Future<void> unblockUser(String blockedUserId) async {
+    final currentUser = auth.currentUser;
+
+    if (currentUser == null) {
+      throw Exception('No authenticated user found');
+    }
+    await firebaseFirestore
+        .collection("Users")
+        .doc(currentUser.uid)
+        .collection("BlockedUser")
+        .doc(blockedUserId)
+        .delete();
+    notifyListeners();
+  }
+
+  // Get Blocked user
+  Stream<List<Map<String, dynamic>>> getBlockedUserStream(String userId) {
+    return firebaseFirestore
+        .collection("Users")
+        .doc(userId)
+        .collection("BlockedUser")
+        .snapshots()
+        .asyncMap((snapshot) async {
+          final blockedUserIds = snapshot.docs.map((doc) => doc.id).toList();
+          final userDocs = await Future.wait(
+            blockedUserIds.map(
+              (id) => firebaseFirestore.collection("Users").doc(id).get(),
+            ),
+          );
+          return userDocs
+              .where((doc) => doc.exists)
+              .map((doc) => doc.data()! as Map<String, dynamic>)
+              .toList();
+        });
+  }
 }
