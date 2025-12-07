@@ -24,7 +24,7 @@ class ChatServices extends ChangeNotifier {
         });
   }
 
-  // Get all user expects blocked users
+  // Get all user expect blocked users
   Stream<List<Map<String, dynamic>>> getUserStreamExceptBlockedUser() {
     final currentUser = auth.currentUser;
     if (currentUser == null) {
@@ -121,10 +121,6 @@ class ChatServices extends ChangeNotifier {
     if (currentUser == null) {
       throw Exception('No authenticated user found');
     }
-
-    if (currentUser.uid == userID) {
-      throw Exception('Cannot block yourself');
-    }
     await firebaseFirestore
         .collection("Users")
         .doc(currentUser.uid)
@@ -165,7 +161,8 @@ class ChatServices extends ChangeNotifier {
             ),
           );
           return userDocs
-              .map((doc) => doc.data() as Map<String, dynamic>)
+              .where((doc) => doc.exists)
+              .map((doc) => doc.data()! as Map<String, dynamic>)
               .toList();
         });
   }
