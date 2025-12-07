@@ -115,4 +115,22 @@ class ChatServices extends ChangeNotifier {
   }
 
   // Get Blocked user
+  Stream<List<Map<String, dynamic>>> getBlockedUserStream(String userId) {
+    return firebaseFirestore
+        .collection("Users")
+        .doc(userId)
+        .collection("BlockedUser")
+        .snapshots()
+        .asyncMap((snapshot) async {
+          final blockedUserIds = snapshot.docs.map((doc) => doc.id).toList();
+          final userDocs = await Future.wait(
+            blockedUserIds.map(
+              (id) => firebaseFirestore.collection("Users").doc(id).get(),
+            ),
+          );
+          return userDocs
+              .map((doc) => doc.data() as Map<String, dynamic>)
+              .toList();
+        });
+  }
 }
