@@ -162,7 +162,7 @@ class ChatServices extends ChangeNotifier {
           );
           return userDocs
               .where((doc) => doc.exists)
-              .map((doc) => doc.data()! as Map<String, dynamic>)
+              .map((doc) => doc.data()!)
               .toList();
         });
   }
