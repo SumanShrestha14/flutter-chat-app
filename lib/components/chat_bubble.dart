@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_app/features/chat/chat_services.dart';
 
 class ChatBubble extends StatelessWidget {
   final String message;
@@ -24,7 +25,7 @@ class ChatBubble extends StatelessWidget {
             CupertinoActionSheetAction(
               onPressed: () {
                 Navigator.pop(context);
-                reportMessage();
+                reportMessage(context, messageID, userID);
               },
               isDestructiveAction: true,
               child: const Text("Report", style: TextStyle(fontSize: 16)),
@@ -47,8 +48,35 @@ class ChatBubble extends StatelessWidget {
     );
   }
 
-  void reportMessage() {
-    // TODO : implement
+  void reportMessage(BuildContext context, String messageID, String userID) {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text("Report Message"),
+        content: const Text("Are you sure you want to report this message?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              ChatServices().reportUser;
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  behavior: SnackBarBehavior.floating,
+                  content: Text("Report Successful"),
+                ),
+              );
+            },
+            child: Text("Report"),
+          ),
+        ],
+      ),
+    );
   }
 
   void blockUser() {
