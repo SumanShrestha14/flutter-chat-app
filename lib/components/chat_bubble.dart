@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ChatBubble extends StatelessWidget {
@@ -5,6 +6,7 @@ class ChatBubble extends StatelessWidget {
   final bool isCurrentUser;
   final String messageID;
   final String userID;
+
   const ChatBubble({
     super.key,
     required this.message,
@@ -13,39 +15,52 @@ class ChatBubble extends StatelessWidget {
     required this.userID,
   });
 
-  // Show Options
   void showOptions(BuildContext context, String messageID, String userID) {
-    showModalBottomSheet(
+    showCupertinoModalPopup(
       context: context,
       builder: (context) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              // report message
-              ListTile(
-                leading: const Icon(Icons.flag),
-                title: const Text("Report"),
-                onTap: () {},
-              ),
-              // block user
-              // cancel
-            ],
+        return CupertinoActionSheet(
+          actions: [
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(context);
+                reportMessage();
+              },
+              isDestructiveAction: true,
+              child: const Text("Report", style: TextStyle(fontSize: 16)),
+            ),
+            CupertinoActionSheetAction(
+              onPressed: () {
+                Navigator.pop(context);
+                blockUser();
+              },
+              child: const Text("Block User", style: TextStyle(fontSize: 16)),
+            ),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel", style: TextStyle(fontSize: 16)),
+            isDefaultAction: true,
           ),
         );
       },
     );
   }
 
-  // report message
+  void reportMessage() {
+    // TODO : implement
+  }
 
-  // Block user
+  void blockUser() {
+    // TODO : implement
+  }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onLongPress: () {
+        debugPrint("Long Press");
         if (!isCurrentUser) {
-          // show options to report block and unblock
           showOptions(context, messageID, userID);
         }
       },
