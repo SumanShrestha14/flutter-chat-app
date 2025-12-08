@@ -48,31 +48,49 @@ class ChatBubble extends StatelessWidget {
     );
   }
 
-  void reportMessage(BuildContext context, String messageID, String userID) {
+  Future<void> reportMessage(
+    BuildContext context,
+    String messageID,
+    String userID,
+  ) async {
     showCupertinoDialog(
       context: context,
       builder: (context) => CupertinoAlertDialog(
         title: const Text("Report Message"),
         content: const Text("Are you sure you want to report this message?"),
         actions: [
-          TextButton(
+          CupertinoDialogAction(
             onPressed: () {
               Navigator.pop(context);
             },
-            child: Text("Cancel"),
+            child: const Text("Cancel"),
           ),
-          TextButton(
-            onPressed: () {
-              ChatServices().reportUser(messageID, userID);
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () async {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  behavior: SnackBarBehavior.floating,
-                  content: Text("Report Successful"),
-                ),
-              );
+              try {
+                await ChatServices().reportUser(messageID, userID);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      behavior: SnackBarBehavior.floating,
+                      content: Text("Report Successful"),
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      behavior: SnackBarBehavior.floating,
+                      content: Text("Report failed: $e"),
+                    ),
+                  );
+                }
+              }
             },
-            child: Text("Report"),
+            child: const Text("Report"),
           ),
         ],
       ),
