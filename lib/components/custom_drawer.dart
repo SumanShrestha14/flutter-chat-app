@@ -74,17 +74,15 @@ class _CustomDrawerState extends State<CustomDrawer> {
 
           Container(
             color: Theme.of(context).colorScheme.primary,
-            child:
-                // Padding(
-                // padding: const EdgeInsets.only(left: 25.0, bottom: 50),
-                // child:
-                ListTile(
-                  title: Text("L O G O U T"),
-                  leading: Icon(Icons.logout),
-                  onTap: () => logout(),
-                ),
+            child: Padding(
+              padding: const EdgeInsets.only(left: 25.0, bottom: 10),
+              child: ListTile(
+                title: Text("L O G O U T"),
+                leading: Icon(Icons.logout),
+                onTap: () => logout(),
+              ),
+            ),
           ),
-          // ),
           // settings
           // logout
         ],

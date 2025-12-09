@@ -31,7 +31,6 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // dark mode
                 Text("Dark Mode"),
                 CupertinoSwitch(
                   value: Provider.of<ThemeProvider>(
@@ -66,7 +65,6 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // dark mode
                   Text("Blocked Users"),
                   Icon(
                     Icons.arrow_forward_ios,

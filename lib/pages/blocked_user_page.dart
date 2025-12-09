@@ -18,7 +18,7 @@ class BlockedUserPage extends StatelessWidget {
         stream: chatServices.getBlockedUserStream(userID),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(child: Text("Error occured"));
+            return const Center(child: Text("Error occurred"));
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: Text("Loading ..."));
@@ -58,11 +58,21 @@ class BlockedUserPage extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              chatServices.unblockUser(userID);
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Unblock Successful")),
-              );
+              try {
+                chatServices.unblockUser(userID);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Unblock Successful")),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text("Unblock failed: $e")));
+                }
+              }
             },
             child: const Text("Unblock"),
           ),

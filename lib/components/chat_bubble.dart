@@ -120,7 +120,7 @@ class ChatBubble extends StatelessWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       behavior: SnackBarBehavior.floating,
-                      content: Text("Blocked Succesfully"),
+                      content: Text("Blocked Successfully"),
                     ),
                   );
                 }
