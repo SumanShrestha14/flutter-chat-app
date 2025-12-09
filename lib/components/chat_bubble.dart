@@ -33,15 +33,15 @@ class ChatBubble extends StatelessWidget {
             CupertinoActionSheetAction(
               onPressed: () {
                 Navigator.pop(context);
-                blockUser();
+                blockUser(context, userID);
               },
               child: const Text("Block User", style: TextStyle(fontSize: 16)),
             ),
           ],
           cancelButton: CupertinoActionSheetAction(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel", style: TextStyle(fontSize: 16)),
             isDefaultAction: true,
+            child: const Text("Cancel", style: TextStyle(fontSize: 16)),
           ),
         );
       },
@@ -97,8 +97,49 @@ class ChatBubble extends StatelessWidget {
     );
   }
 
-  void blockUser() {
-    // TODO : implement
+  Future<void> blockUser(BuildContext context, String userID) async {
+    showCupertinoDialog(
+      context: context,
+      builder: (context) => CupertinoAlertDialog(
+        title: const Text("Block User"),
+        content: const Text("Are you sure you want to block this User?"),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text("Cancel"),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () async {
+              Navigator.pop(context);
+              try {
+                await ChatServices().blockUser(userID);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      behavior: SnackBarBehavior.floating,
+                      content: Text("Blocked Succesfully"),
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      behavior: SnackBarBehavior.floating,
+                      content: Text("Block failed: $e"),
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text("Block"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

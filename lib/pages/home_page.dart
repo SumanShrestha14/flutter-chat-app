@@ -14,7 +14,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(title: Text("Home page")),
+      appBar: AppBar(title: Center(child: Text("C H A T S"))),
       drawer: CustomDrawer(),
       body: buildUserList(),
     );
@@ -22,7 +22,7 @@ class HomePage extends StatelessWidget {
 
   Widget buildUserList() {
     return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: chatService.getUserStream(),
+      stream: chatService.getUserStreamExceptBlockedUser(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Text("Error occurred!");
