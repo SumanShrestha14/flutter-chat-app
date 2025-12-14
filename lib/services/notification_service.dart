@@ -32,7 +32,6 @@ class NotificationService {
       return;
     }
 
-    initialized = true;
     // Request permissions for iOS
     NotificationSettings settings = await _firebaseMessaging.requestPermission(
       alert: true,
@@ -119,6 +118,8 @@ class NotificationService {
       debugPrint('FCM Token refreshed: $newToken');
       // You can save this token to Firestore for sending targeted notifications
     });
+
+    initialized = true;
   }
 
   // Handle foreground messages (when app is open)
