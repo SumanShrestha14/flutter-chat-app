@@ -1,7 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_chat_app/features/auth/auth_gate.dart';
 import 'package:flutter_chat_app/firebase_options.dart';
 import 'package:flutter_chat_app/pages/chat_page.dart';
@@ -26,17 +25,23 @@ void main() async {
     if (payload != null) {
       // Payload format: "senderId|senderEmail"
       final parts = payload.split('|');
-      if (parts.length == 2) {
+      if (parts.length == 2 && parts[0].isNotEmpty && parts[1].isNotEmpty) {
         final senderId = parts[0];
         final senderEmail = parts[1];
 
         // Navigate to chat with the sender
-        navigatorKey.currentState?.push(
-          MaterialPageRoute(
-            builder: (context) =>
-                ChatPage(receiverEmail: senderEmail, receiverID: senderId),
-          ),
-        );
+        navigatorKey.currentState
+            ?.push(
+              MaterialPageRoute(
+                builder: (context) =>
+                    ChatPage(receiverEmail: senderEmail, receiverID: senderId),
+              ),
+            )
+            .catchError((error) {
+              debugPrint('Failed to navigate from notification: $error');
+            });
+      } else {
+        debugPrint('Invalid notification payload format: $payload');
       }
     }
   });
@@ -50,6 +55,7 @@ void main() async {
   }
 
   // Also listen for auth state changes
+  // Note: This listener persists for the app's lifetime and doesn't need disposal
   FirebaseAuth.instance.authStateChanges().listen((user) {
     if (user != null) {
       debugPrint('User authenticated, starting message listener');

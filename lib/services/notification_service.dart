@@ -2,7 +2,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'dart:io' show Platform;
 
 // Background message handler (must be top-level function)
@@ -10,7 +9,7 @@ import 'dart:io' show Platform;
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   debugPrint("Handling background message: ${message.messageId}");
-  
+
   // Show local notification for background messages
   final notificationService = NotificationService();
   await notificationService.showLocalNotification(message);
@@ -26,8 +25,14 @@ class NotificationService {
 
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
+  bool initialized = false;
   // Initialize notification service
   Future<void> initialize() async {
+    if (initialized) {
+      return;
+    }
+
+    initialized = true;
     // Request permissions for iOS
     NotificationSettings settings = await _firebaseMessaging.requestPermission(
       alert: true,
@@ -37,15 +42,17 @@ class NotificationService {
     );
 
     debugPrint('FCM User granted permission: ${settings.authorizationStatus}');
-    
+
     // Request Android 13+ notification permissions
     if (Platform.isAndroid) {
       final androidImplementation = _localNotifications
           .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
-      
+            AndroidFlutterLocalNotificationsPlugin
+          >();
+
       if (androidImplementation != null) {
-        final granted = await androidImplementation.requestNotificationsPermission();
+        final granted = await androidImplementation
+            .requestNotificationsPermission();
         debugPrint('Android notification permission granted: $granted');
       }
     }
@@ -56,10 +63,10 @@ class NotificationService {
 
     const DarwinInitializationSettings iosSettings =
         DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+          requestAlertPermission: true,
+          requestBadgePermission: true,
+          requestSoundPermission: true,
+        );
 
     const InitializationSettings initSettings = InitializationSettings(
       android: androidSettings,
@@ -83,7 +90,8 @@ class NotificationService {
 
     await _localNotifications
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(channel);
 
     // Set up foreground message handler
@@ -105,7 +113,7 @@ class NotificationService {
     // Get FCM token
     String? token = await _firebaseMessaging.getToken();
     debugPrint('FCM Token: $token');
-    
+
     // Listen for token refresh
     _firebaseMessaging.onTokenRefresh.listen((newToken) {
       debugPrint('FCM Token refreshed: $newToken');
@@ -116,7 +124,7 @@ class NotificationService {
   // Handle foreground messages (when app is open)
   Future<void> _handleForegroundMessage(RemoteMessage message) async {
     debugPrint('Foreground message received: ${message.messageId}');
-    
+
     // Show local notification for foreground messages
     await showLocalNotification(message);
   }
@@ -127,15 +135,16 @@ class NotificationService {
 
     if (notification == null) return;
 
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-      'chat_messages',
-      'Chat Messages',
-      channelDescription: 'Notifications for incoming chat messages',
-      importance: Importance.high,
-      priority: Priority.high,
-      showWhen: true,
-      icon: '@mipmap/ic_launcher',
-    );
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
+          'chat_messages',
+          'Chat Messages',
+          channelDescription: 'Notifications for incoming chat messages',
+          importance: Importance.high,
+          priority: Priority.high,
+          showWhen: true,
+          icon: '@mipmap/ic_launcher',
+        );
 
     const DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
       presentAlert: true,
@@ -149,14 +158,19 @@ class NotificationService {
     );
 
     // Use message ID as notification ID, or use a hash of sender ID
-    int notificationId = message.hashCode;
+    int notificationId = message.hashCode.abs();
+
+    // Build payload in same format as MessageNotificationListener: "senderId|senderEmail"
+    final senderId = message.data['senderId'] ?? '';
+    final senderEmail = message.data['senderEmail'] ?? '';
+    final payload = '$senderId|$senderEmail';
 
     await _localNotifications.show(
       notificationId,
       notification.title ?? 'New Message',
       notification.body ?? '',
       details,
-      payload: message.data.toString(), // Pass data for navigation
+      payload: payload,
     );
   }
 
@@ -173,8 +187,11 @@ class NotificationService {
     debugPrint('Notification opened app: ${message.messageId}');
     // Extract sender info from message data and navigate to chat
     final data = message.data;
-    if (data.containsKey('senderId') && _onNotificationTapCallback != null) {
-      _onNotificationTapCallback!(data['senderId']);
+    if (data.containsKey('senderId') &&
+        data.containsKey('senderEmail') &&
+        _onNotificationTapCallback != null) {
+      final payload = '${data['senderId']}|${data['senderEmail']}';
+      _onNotificationTapCallback!(payload);
     }
   }
 
@@ -203,4 +220,3 @@ class NotificationService {
     await _firebaseMessaging.unsubscribeFromTopic(topic);
   }
 }
-
