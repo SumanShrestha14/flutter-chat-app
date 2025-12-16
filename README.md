@@ -1,16 +1,68 @@
-# flutter_chat_app
+# 💬 FLUTTER_CHAT_APP
 
-A new Flutter project
+A dynamic and modern chat application built with **Flutter** and powered by **Firebase**.  
+This app provides secure authentication, real-time messaging, user management features, and push notifications for a smooth and interactive chat experience.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 🚀 Features
 
-A few resources to get you started if this is your first Flutter project:
+- 🔐 **Login & Registration** – Secure authentication using Firebase  
+- 👥 **User Listing** – View all registered users  
+- 💬 **Real-Time Messaging** – Send and receive messages instantly  
+- 🚩 **Report Users** – Report inappropriate users or messages  
+- 🚫 **Block / Unblock Users** – Full blocking management system  
+- 🔔 **Push Notifications** – Real-time message notifications  
+- ⬇️ **Auto Scroll** – Automatically scrolls to the bottom when a new message arrives  
+- 🌗 **Light & Dark Mode** – Seamless theme switching  
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📦 Tech Stack
+
+- **Frontend:** [Flutter](https://docs.flutter.dev/get-started/quick)  
+- **Backend:** [Firebase](https://firebase.google.com/)  
+
+---
+
+## 🛠️ Getting Started
+
+### 1️⃣ Clone the Repository
+
+```bash
+git clone https://github.com/SumanShrestha14/flutter-chat-app
+cd flutter_chat_app
+```
+### 2. Run app ▶️
+#### First install all dependencies 
+```bash 
+  flutter pub get
+```
+**⚠️ Make sure Firebase is properly configured before running the project.**
+***
+if not run 
+```bash
+npm install -g firebase-tools
+firebase login
+dart pub global activate flutterfire_cli
+flutterfire configure
+```
+***
+#### Now run project 
+```bash
+  flutter run 
+```
+
+## © 2025 Suman Shrestha. All rights reserved.
+
+This project, flutter_chat_app is open-source 
+You are free to use, modify, and distribute the code for personal or commercial purposes,  
+provided that the original author is credited.
+
+Unauthorized reproduction, commercial reselling without proper attribution, or distribution  
+of substantial portions of the software without express permission is prohibited.
+
+For licensing inquiries, please contact: 
+### sumanstha0614@gmail.com
+
+*⭐ If you like this project, consider giving it a star on GitHub!*
