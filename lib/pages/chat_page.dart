@@ -4,6 +4,7 @@ import 'package:flutter_chat_app/components/chat_bubble.dart';
 import 'package:flutter_chat_app/components/custom_input_field.dart';
 import 'package:flutter_chat_app/features/auth/auth_service.dart';
 import 'package:flutter_chat_app/features/chat/chat_services.dart';
+import 'package:flutter_chat_app/services/message_notification_listener.dart';
 
 class ChatPage extends StatefulWidget {
   final String receiverEmail;
@@ -34,6 +35,9 @@ class _ChatPageState extends State<ChatPage> {
   void initState() {
     super.initState();
 
+    // Set current chat to prevent notifications for this chat
+    MessageNotificationListener().setCurrentChat(widget.receiverID);
+
     focusNode.addListener(() {
       if (focusNode.hasFocus) {
         // cause a delay so that keyboard has time to show up
@@ -48,6 +52,8 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   void dispose() {
+    // Clear current chat when leaving chat page
+    MessageNotificationListener().setCurrentChat(null);
     focusNode.dispose();
     messageController.dispose();
     scrollController.dispose();
